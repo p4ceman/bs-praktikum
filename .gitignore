@@ -1,1 +1,4 @@
 cmake-build-own-bs-praktikum-docker-container/
+cmake-build-bs-praktikum/
+cmake-build-debug/
+**/.DS_Store
