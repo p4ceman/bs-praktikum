@@ -1,0 +1,1 @@
+/usr/bin/cc -O3 -DNDEBUG   CMakeFiles/bs_praktikum.dir/main.c.o  -o bs_praktikum 
