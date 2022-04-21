@@ -1,3 +1,0 @@
-/root/bs-praktikum/cmake-build-own-bs-praktikum-docker-container/CMakeFiles/rebuild_cache.dir
-/root/bs-praktikum/cmake-build-own-bs-praktikum-docker-container/CMakeFiles/edit_cache.dir
-/root/bs-praktikum/cmake-build-own-bs-praktikum-docker-container/CMakeFiles/bs_praktikum.dir
