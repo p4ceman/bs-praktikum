@@ -3,4 +3,4 @@ project(bs_praktikum C)
 
 set(CMAKE_C_STANDARD 99)
 
-add_executable(bs_praktikum main.c)
+add_executable(bs_praktikum main.c main.h keyValStore.c keyValStore.h sub.c sub.h)
