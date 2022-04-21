@@ -1,6 +1,8 @@
 
 #include "keyValStore.h"
 #include <string.h>
+#include <stdio.h>
+
 
 #define ARRAYLENGTH 100
 
@@ -33,7 +35,7 @@ int put(char* key, char* value) {
             return(1);
         }
         i++;
-        if (i == 100) {
+        if (i == ARRAYLENGTH) {
             return(-1);
         }
     }
@@ -42,10 +44,23 @@ int put(char* key, char* value) {
     return(0);
 }
 
-
+//Die get() Funktion soll einen Schlüsselwert (key) in der Datenhaltung suchen und den hinterlegten Wert (value) zurückgeben.
+// Ist der Wert nicht vorhanden, wird durch einen Rückgabewert <0 darauf aufmerksam gemacht.
+// Gibt 0 zurück wenn key gefunden wurde , -1 wenn key nicht vorhanden ist
 int get(char* key, char* res) {
-
-}
+int i=0;
+    while (dictionary[i].key != NULL){
+        if(strcmp(dictionary[i].key,key)==0){
+            *res = dictionary[i].value;
+            return 0;
+        }
+        i++;
+        if (i==ARRAYLENGTH){
+            return -1;
+        }
+    }
+    return -1;
+}// &res beim aufrufen in main nutzen /beachten... funktuniert sinnst nicht!!!!
 
 int del(char* key) {
 
