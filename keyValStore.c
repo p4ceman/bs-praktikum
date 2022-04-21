@@ -68,7 +68,7 @@ int del(char* key) {
         }
         i++;
         if (i == ARRAYLENGTH) {
-            return -1;
+            return 0;
         }
     }
     return 0;
