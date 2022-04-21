@@ -1,4 +1,6 @@
-.idea
+.idea/
 cmake-build-own-bs-praktikum-docker-container/
-cmake-build-debug-bs22
-cmake-build-dockerbspraktikum
+cmake-build-debug-bs22/
+cmake-build-dockerbspraktikum/
+cmake-build-bs-praktikum/
+**/.DS_Store
