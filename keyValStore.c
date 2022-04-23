@@ -1,9 +1,7 @@
-
 #include "keyValStore.h"
 #include <string.h>
 #include <stdio.h>
-
-
+#include <regex.h>
 #define ARRAYLENGTH 100
 
 typedef struct keyValue{
@@ -17,8 +15,18 @@ void initializeDictionary() {
 
 }
 
-//checked Sonderzeichen und Leerzeichen
-int accept(char* string);
+/*Prüft, ob übergebener String keine unzulässigen Zeichen, wie Sonderzeichen enthält
+Rückgabewert:   1 => String ist valide
+                0 => String ist nicht valide*/
+int isStringValid(char* string){
+    regex_t regex;
+    regcomp(&regex,"^([A-Za-z0-9])*$", REG_EXTENDED);
+    if(regexec(&regex, string, 0, NULL, 0) == 0){
+        return 1;
+    } else{
+        return 0;
+    }
+}
 
 //Die put() Funktion soll eine Wert (value) mit dem Schlüsselwert (key) hinterlegen.
 //Wenn der Schlüssel bereits vorhanden ist, soll der Wert überschrieben werden.
@@ -43,6 +51,7 @@ int put(char* key, char* value) {
     dictionary[i].value = value;
     return(0);
 }
+
 
 //Die get() Funktion soll einen Schlüsselwert (key) in der Datenhaltung suchen und den hinterlegten Wert (value) zurückgeben.
 // Ist der Wert nicht vorhanden, wird durch einen Rückgabewert <0 darauf aufmerksam gemacht.

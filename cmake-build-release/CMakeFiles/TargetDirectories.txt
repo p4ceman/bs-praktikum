@@ -1,0 +1,3 @@
+C:/Users/justi/CLionProjects/bs-praktikum/cmake-build-release/CMakeFiles/bs_praktikum.dir
+C:/Users/justi/CLionProjects/bs-praktikum/cmake-build-release/CMakeFiles/edit_cache.dir
+C:/Users/justi/CLionProjects/bs-praktikum/cmake-build-release/CMakeFiles/rebuild_cache.dir
