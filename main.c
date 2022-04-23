@@ -4,26 +4,20 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
-#include "main.h"
 #include "keyValStore.h"
 #include "sub.h"
 
-#define BUFSIZE 1024 // Größe des Buffers
-#define TRUE 1
-#define ENDLOSSCHLEIFE 1
+#define BUFFERSIZE 1024 // Größe des Buffers
 #define PORT 5678
 
-
 int main() {
-
     int rfd; // Rendevouz-Descriptor
     int cfd; // Verbindungs-Descriptor
 
     struct sockaddr_in client; // Socketadresse eines Clients
     socklen_t client_len; // Länge der Client-Daten
-    char in[BUFSIZE]; // Daten vom Client an den Server
-    int bytes_read; // Anzahl der Bytes, die der Client geschickt hat
-
+    char input[BUFFERSIZE]; // Daten vom Client an den Server
+    long bytes_read; // Anzahl der Bytes, die der Client geschickt hat
 
     // Socket erstellen
     rfd = socket(AF_INET, SOCK_STREAM, 0);
@@ -32,11 +26,9 @@ int main() {
         exit(-1);
     }
 
-
     // Socket Optionen setzen für schnelles wiederholtes Binden der Adresse
     int option = 1;
     setsockopt(rfd, SOL_SOCKET, SO_REUSEADDR, (const void *) &option, sizeof(int));
-
 
     // Socket binden
     struct sockaddr_in server;
@@ -49,7 +41,6 @@ int main() {
         exit(-1);
     }
 
-
     // Socket lauschen lassen
     int lrt = listen(rfd, 5);
     if (lrt < 0 ){
@@ -57,26 +48,39 @@ int main() {
         exit(-1);
     }
 
-    while (ENDLOSSCHLEIFE) {
-
+    while (1) {
         // Verbindung eines Clients wird entgegengenommen
         cfd = accept(rfd, (struct sockaddr *) &client, &client_len);
 
         // Lesen von Daten, die der Client schickt
-        bytes_read = read(cfd, in, BUFSIZE);
+        bytes_read = read(cfd, input, BUFFERSIZE);
+        input[bytes_read - 2] = '\0';
 
-        // Zurückschicken der Daten, solange der Client welche schickt (und kein Fehler passiert)
         while (bytes_read > 0) {
-            printf("sending back the %d bytes I received...\n", bytes_read);
-
-            write(cfd, in, bytes_read);
-            bytes_read = read(cfd, in, BUFSIZE);
-
+            char output[50];
+            if (isInputValid(input)) {
+                char *key;
+                char *value;
+                int command = decodeCommand(input, &key, &value);
+                int error;
+                switch (command) {
+                    case 0:
+                        error = put(key, value);
+                        break;
+                    case 1:
+                        error = get(key, &value);
+                        break;
+                    case 2:
+                        error = del(key);
+                        break;
+                    case 3:
+                        close(cfd);
+                }
+                printer(command, key, value, error, output);
+                write(cfd, output, sizeof(output));
+            }
+            bytes_read = read(cfd, input, BUFFERSIZE);
+            input[bytes_read - 2] = '\0';
         }
-        close(cfd);
     }
-
-    // Rendevouz Descriptor schließen
-    close(rfd);
-
 }
