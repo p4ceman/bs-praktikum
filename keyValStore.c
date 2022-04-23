@@ -57,10 +57,13 @@ int get(char* key, char* res) {
 }
 
 //Die del() Funktion soll einen Schlüsselwert suchen und zusammen mit dem Wert aus der Datenhaltung entfernen.
-// Rückgabewert: 0 -> Key nicht vorhanden
-//               1 -> Key und Value wurden erfolgreich entfernt
+// Rückgabewert: -1 -> String is nicht valide
+//                0 -> Key nicht vorhanden
+//                1 -> Key und Value wurden erfolgreich entfernt
 int del(char* key) {
-    isStringValid(key);
+    if(isStringValid(key) == 0) {
+        return -1;
+    }
     int i = 0;
     while (dictionary[i].key != NULL) {
         if (strcmp(dictionary[i].key, key) == 0) {
@@ -77,8 +80,8 @@ int del(char* key) {
         }
         i++;
         if (i == ARRAYLENGTH) {
-            return -1;
+            return 0;
         }
     }
-    return -1;
+    return 0;
 }
