@@ -4,7 +4,7 @@
 
 int isStringValid(char* string);
 int put(char*, char*);
-int get(char*, char*);
+int get(char*, char**);
 int del(char*);
 
 

@@ -55,7 +55,7 @@ int put(char* key, char* value) {
 //Die get() Funktion soll einen Schlüsselwert (key) in der Datenhaltung suchen und den hinterlegten Wert (value) zurückgeben.
 // Ist der Wert nicht vorhanden, wird durch einen Rückgabewert <0 darauf aufmerksam gemacht.
 // Gibt 0 zurück wenn key gefunden wurde , -1 wenn key nicht vorhanden ist, -2 wenn key nicht valiede
-int get(char *key, char *res) {
+int get(char *key, char **res) {
     if (isStringValid(key)) {
         int i = 0;
         while (dictionary[i].key != NULL) {
