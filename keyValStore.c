@@ -32,24 +32,25 @@ int isStringValid(char* string){
 //Wenn der Schlüssel bereits vorhanden ist, soll der Wert überschrieben werden.
 //Der Rückgabewert der Funktion könnte Auskunft dazu geben.
 //Gibt 0 zurück wenn neuer Key hinzugefügt wurde, 1 wenn Value zu bereits existierendem Key überschrieben würde
-//und -1 wenn das Array voll ist.
-int put(char* key, char* value) {
-    //accept(key)
-    //accept(value)
+//und -1 wenn das Array voll ist. return -2 wenn strings nicht valide sind.
+int put(char *key, char *value) {
+    if (!isStringValid(key) && !isStringValid(value)) {
+        return -2;
+    }
     int i = 0;
     while (dictionary[i].key != NULL) {
-        if (strcmp(dictionary[i].key,key)==0) {
+        if (strcmp(dictionary[i].key, key) == 0) {
             dictionary[i].value = value;
-            return(1);
+            return 1;
         }
         i++;
-        if (i == 100) {
-            return(-1);
+        if (i == ARRAYLENGTH) {
+            return -1;
         }
     }
     dictionary[i].key = key;
     dictionary[i].value = value;
-    return(0);
+    return 0;
 }
 
 //Die get() Funktion soll einen Schlüsselwert (key) in der Datenhaltung suchen und den hinterlegten Wert (value) zurückgeben.
