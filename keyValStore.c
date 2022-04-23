@@ -52,9 +52,26 @@ int put(char* key, char* value) {
     return(0);
 }
 
-int get(char* key, char* res) {
-
-}
+//Die get() Funktion soll einen Schlüsselwert (key) in der Datenhaltung suchen und den hinterlegten Wert (value) zurückgeben.
+// Ist der Wert nicht vorhanden, wird durch einen Rückgabewert <0 darauf aufmerksam gemacht.
+// Gibt 0 zurück wenn key gefunden wurde , -1 wenn key nicht vorhanden ist, -2 wenn key nicht valiede
+int get(char *key, char **res) {
+    if (isStringValid(key)) {
+        int i = 0;
+        while (dictionary[i].key != NULL) {
+            if (strcmp(dictionary[i].key, key) == 0) {
+                *res = dictionary[i].value;
+                return 0;
+            }
+            i++;
+            if (i == ARRAYLENGTH) {
+                return -1;
+            }
+        }
+        return -1;
+    }
+    return -2;
+}// &res beim aufrufen in main nutzen /beachten... funktuniert sinnst nicht!!!!
 
 //Die del() Funktion soll einen Schlüsselwert suchen und zusammen mit dem Wert aus der Datenhaltung entfernen.
 // Rückgabewert: -1 -> String is nicht valide
