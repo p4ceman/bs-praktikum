@@ -60,7 +60,7 @@ int get(char* key, char* res) {
 // Rückgabewert: 0 -> Key nicht vorhanden
 //               1 -> Key und Value wurden erfolgreich entfernt
 int del(char* key) {
-    accept(key);
+    isStringValid(key);
     int i = 0;
     while (dictionary[i].key != NULL) {
         if (strcmp(dictionary[i].key, key) == 0) {
@@ -77,8 +77,8 @@ int del(char* key) {
         }
         i++;
         if (i == ARRAYLENGTH) {
-            return 0;
+            return -1;
         }
     }
-    return 0;
+    return -1;
 }
