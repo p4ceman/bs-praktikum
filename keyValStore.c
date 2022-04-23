@@ -62,7 +62,7 @@ int get(char* key, char* res) {
 //                1 -> Key und Value wurden erfolgreich entfernt
 int del(char* key) {
     if(isStringValid(key) == 0) {
-        return -1;
+        return -2;
     }
     int i = 0;
     while (dictionary[i].key != NULL) {
@@ -71,6 +71,7 @@ int del(char* key) {
                 if (i == ARRAYLENGTH - 1) {
                     dictionary[i].key = NULL;
                     dictionary[i].value = NULL;
+                    break;
                 }
                 dictionary[i].key = dictionary[i + 1].key;
                 dictionary[i].value = dictionary[i + 1].value;
@@ -80,8 +81,8 @@ int del(char* key) {
         }
         i++;
         if (i == ARRAYLENGTH) {
-            return 0;
+            return -1;
         }
     }
-    return 0;
+    return -1;
 }
