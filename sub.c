@@ -1,10 +1,10 @@
 //Datei für die restlichen (allgemeinen) Subroutinen
-
 #include "sub.h"
 #include "keyValStore.h"
 #include <string.h>
+#include <regex.h>
 
-//invalide -1
+// isInputValid vorher laufen lassen
 // PUT 0
 // GET 1
 // DEL 2
@@ -23,5 +23,18 @@ int interpreter(char *input, char **key, char **value) {
         *key = strtok(NULL, " ");
         return 2;
     }
-    return -1;
+    return 3;
+}
+
+/*Prüft, ob übergebener Input zulässig ist
+Rückgabewert:   1 => String ist valide
+                0 => String ist nicht valide*/
+int isInputValid(char* input) {
+    regex_t regex;
+    regcomp(&regex,"^((((put|PUT) ([A-Za-z0-9])+|(get|GET)|(del|DEL)) ([A-Za-z0-9])+)|(quit|QUIT))$", REG_EXTENDED);
+    if(regexec(&regex, input, 0, NULL, 0) == 0){
+        return 1;
+    } else{
+        return 0;
+    }
 }
