@@ -57,7 +57,8 @@ int main() {
         input[bytes_read - 2] = '\0';
 
         while (bytes_read > 0) {
-            char output[50];
+            char output[50] ="\n";
+
             if (isInputValid(input)) {
                 char *key;
                 char *value;
