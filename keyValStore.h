@@ -2,10 +2,9 @@
 #define BS_PRAKTIKUM_KEYVALSTORE_H
 #endif //BS_PRAKTIKUM_KEYVALSTORE_H
 
-int isStringValid(char* string);
-int put(char*, char*);
-int get(char*, char**);
-int del(char*);
+int put(char key[], char value[]);
+int get(char key[], char res[]);
+int del(char key[]);
 
 
 
