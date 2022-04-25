@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -80,7 +81,8 @@ int main() {
                 printer(command, key, value, error, output);
                 write(cfd, output, sizeof(output));
             } else {
-                write(cfd, "Your command is not valid!", sizeof(output));
+                strcat(output, "Your command is not valid!\n");
+                write(cfd, output, sizeof(output));
             }
             bytes_read = read(cfd, input, BUFFERSIZE);
             input[bytes_read - 2] = '\0';

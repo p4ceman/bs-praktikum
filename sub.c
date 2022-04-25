@@ -57,6 +57,7 @@ void printer(int command, char key[], char value[], int error, char string[]) {
             }
             else{
                 strcat(string, value);
+                strcat(string, "\n");
             }
             break;
         case 1:
@@ -68,6 +69,7 @@ void printer(int command, char key[], char value[], int error, char string[]) {
             }
             else{
                 strcat(string, value);
+                strcat(string, "\n");
             }
             break;
         case 2:
