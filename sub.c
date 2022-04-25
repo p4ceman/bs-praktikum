@@ -45,7 +45,7 @@ int isInputValid(char input[]) {
 }
 
 
-void printer(int command, char* key, char* value, int error, char string []){
+void printer(int command, char key[], char value[], int error, char string[]) {
     strcat(string, "> ");
     switch(command){
         case 0:
