@@ -4,8 +4,8 @@
 #define ARRAYLENGTH 100
 
 typedef struct keyValue{
-    char* key;
-    char* value;
+    char key[50];
+    char value[50];
 } KeyValue;
 
 KeyValue dictionary[ARRAYLENGTH];
