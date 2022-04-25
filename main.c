@@ -21,7 +21,7 @@ int main() {
 
     // Socket erstellen
     rfd = socket(AF_INET, SOCK_STREAM, 0);
-    if (rfd < 0 ){
+    if (rfd < 0) {
         fprintf(stderr, "socket konnte nicht erstellt werden\n");
         exit(-1);
     }
@@ -36,14 +36,14 @@ int main() {
     server.sin_addr.s_addr = INADDR_ANY;
     server.sin_port = htons(PORT);
     int brt = bind(rfd, (struct sockaddr *) &server, sizeof(server));
-    if (brt < 0 ){
+    if (brt < 0) {
         fprintf(stderr, "socket konnte nicht gebunden werden\n");
         exit(-1);
     }
 
     // Socket lauschen lassen
     int lrt = listen(rfd, 5);
-    if (lrt < 0 ){
+    if (lrt < 0) {
         fprintf(stderr, "socket konnte nicht listen gesetzt werden\n");
         exit(-1);
     }
@@ -57,11 +57,11 @@ int main() {
         input[bytes_read - 2] = '\0';
 
         while (bytes_read > 0) {
-            char output[50] ="\n";
+            char output[50] = "\n";
 
             if (isInputValid(input)) {
-                char *key;
-                char *value;
+                char key[50];
+                char value[50];
                 int command = decodeCommand(input, &key, &value);
                 int error;
                 switch (command) {
@@ -79,6 +79,8 @@ int main() {
                 }
                 printer(command, key, value, error, output);
                 write(cfd, output, sizeof(output));
+            } else {
+                write(cfd, "Your command is not valid!", sizeof(output));
             }
             bytes_read = read(cfd, input, BUFFERSIZE);
             input[bytes_read - 2] = '\0';

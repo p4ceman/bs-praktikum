@@ -9,18 +9,23 @@
 // GET 1
 // DEL 2
 // QUIT 3
-int decodeCommand(char *input, char **key, char **value) {
+int decodeCommand(char *input, char key[], char value[]) {
     char *command;
+    char * part;
     command = strtok(input, " ");
     if (strcmp(command, "put") == 0 || strcmp(command, "PUT") == 0) {
-        *key = strtok(NULL, " ");
-        *value = strtok(NULL, " ");
+        part = strtok(NULL, " ");
+        strcpy(key, part);
+        part = strtok(NULL, " ");
+        strcpy(value, part);
         return 0;
     } else if (strcmp(command, "get") == 0 || strcmp(command, "GET") == 0) {
-        *key = strtok(NULL, " ");
+        part = strtok(NULL, " ");
+        strcpy(key, part);
         return 1;
     } else if (strcmp(command, "del") == 0 || strcmp(command, "DEL") == 0) {
-        *key = strtok(NULL, " ");
+        part = strtok(NULL, " ");
+        strcpy(key, part);
         return 2;
     }
     return 3;
@@ -48,7 +53,7 @@ void printer(int command, char* key, char* value, int error, char string []){
             strcat(string, key);
             strcat(string, ":");
             if(error == -1){
-                strcat(string, "array_is_full");
+                strcat(string, "array_is_full\n");
             }
             else{
                 strcat(string, value);
@@ -59,7 +64,7 @@ void printer(int command, char* key, char* value, int error, char string []){
             strcat(string, key);
             strcat(string, ":");
             if(error == -1){
-                strcat(string, "key_nonexistent");
+                strcat(string, "key_nonexistent\n");
             }
             else{
                 strcat(string, value);
@@ -70,10 +75,10 @@ void printer(int command, char* key, char* value, int error, char string []){
             strcat(string, key);
             strcat(string, ":");
             if(error == -1){
-                strcat(string, "key_nonexistent");
+                strcat(string, "key_nonexistent\n");
             }
             else{
-                strcat(string, "key_deleted");
+                strcat(string, "key_deleted\n");
             }
             break;
     }
