@@ -2,14 +2,21 @@
 #include <string.h>
 
 #define ARRAYLENGTH 100
-#define INPUTBUFFERSIZE 1024
+#define KEYVALUELENGTH 1024
 
 typedef struct keyValue{
-    char key[INPUTBUFFERSIZE];
-    char value[INPUTBUFFERSIZE];
+    char key[KEYVALUELENGTH];
+    char value[KEYVALUELENGTH];
 } KeyValue;
 
 KeyValue dictionary[ARRAYLENGTH];
+
+void initiliaze(){
+    for (int i = 0; i < ARRAYLENGTH; ++i) {
+        dictionary[i].key[0] = '\0';
+        dictionary[i].value[0] = '\0';
+    }
+}
 
 //Die put() Funktion soll eine Wert (value) mit dem Schlüsselwert (key) hinterlegen.
 //Wenn der Schlüssel bereits vorhanden ist, soll der Wert überschrieben werden.
@@ -30,8 +37,6 @@ int put(char* key, char* value) {
     }
     strcpy(dictionary[i].key, key);
     strcpy(dictionary[i].value, value);
-    /*dictionary[i+1].key[0] = '\0';
-    dictionary[i+1].value[0] = '\0';*/
     return 0;
 }
 

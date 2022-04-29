@@ -10,7 +10,6 @@
 // DEL 2
 // QUIT 3
 int decodeCommand(char* input, char* key, char* value) {
-    /*char *command;*/
     char* part;
     char* command = strtok(input, " ");
     if (strcmp(command, "put") == 0 || strcmp(command, "PUT") == 0) {
