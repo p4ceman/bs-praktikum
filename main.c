@@ -53,39 +53,45 @@ int main() {
         // Verbindung eines Clients wird entgegengenommen
         cfd = accept(rfd, (struct sockaddr *) &client, &client_len);
 
-        // Lesen von Daten, die der Client schickt
-        bytes_read = read(cfd, input, BUFFERSIZE);
-        input[bytes_read - 2] = '\0';
+        int pid = fork();
 
-        while (bytes_read > 0) {
-            char output[50] = "\n";
-
-            if (isInputValid(input)) {
-                char key[50];
-                char value[50];
-                int command = decodeCommand(input, &key, &value);
-                int error;
-                switch (command) {
-                    case 0:
-                        error = put(key, value);
-                        break;
-                    case 1:
-                        error = get(key, &value);
-                        break;
-                    case 2:
-                        error = del(key);
-                        break;
-                    case 3:
-                        close(cfd);
-                }
-                printer(command, key, value, error, output);
-                write(cfd, output, sizeof(output));
-            } else {
-                strcat(output, "Your command is not valid!\n");
-                write(cfd, output, sizeof(output));
-            }
+        if (pid == 0) {
+            // Lesen von Daten, die der Client schickt
             bytes_read = read(cfd, input, BUFFERSIZE);
             input[bytes_read - 2] = '\0';
+
+            while (bytes_read > 0) {
+                char output[50] = "\n";
+
+                if (isInputValid(input)) {
+                    char key[50];
+                    char value[50];
+                    int command = decodeCommand(input, &key, &value);
+                    int error;
+                    switch (command) {
+                        case 0:
+                            error = put(key, value);
+                            break;
+                        case 1:
+                            error = get(key, &value);
+                            break;
+                        case 2:
+                            error = del(key);
+                            break;
+                        case 3:
+                            close(cfd);
+                    }
+                    printer(command, key, value, error, output);
+                    write(cfd, output, sizeof(output));
+                } else {
+                    strcat(output, "Your command is not valid!\n");
+                    write(cfd, output, sizeof(output));
+                }
+                bytes_read = read(cfd, input, BUFFERSIZE);
+                input[bytes_read - 2] = '\0';
+            }
+        } else {
+            close(cfd);
         }
     }
 }
