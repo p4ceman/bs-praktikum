@@ -2,13 +2,13 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include "keyValStore.h"
 #include "sub.h"
 
-#define BUFFERSIZE 1024 // Größe des Buffers
+#define KEYVALUELENGTH 1024 // Größe des Buffers
+#define OUTPUTBUFFERSIZE 2048
 #define PORT 5678
 
 int main() {
@@ -17,7 +17,7 @@ int main() {
 
     struct sockaddr_in client; // Socketadresse eines Clients
     socklen_t client_len; // Länge der Client-Daten
-    char input[BUFFERSIZE]; // Daten vom Client an den Server
+    char input[KEYVALUELENGTH]; // Daten vom Client an den Server
     long bytes_read; // Anzahl der Bytes, die der Client geschickt hat
 
     // Socket erstellen
@@ -49,28 +49,29 @@ int main() {
         exit(-1);
     }
 
+    initiliaze();
+
     while (1) {
         // Verbindung eines Clients wird entgegengenommen
         cfd = accept(rfd, (struct sockaddr *) &client, &client_len);
 
         // Lesen von Daten, die der Client schickt
-        bytes_read = read(cfd, input, BUFFERSIZE);
-        input[bytes_read - 2] = '\0';
+        bytes_read = read(cfd, input, KEYVALUELENGTH);
 
         while (bytes_read > 0) {
-            char output[50] = "\n";
-
+            input[bytes_read - 2] = '\0';
+            char output[OUTPUTBUFFERSIZE] = "";
             if (isInputValid(input)) {
-                char key[50];
-                char value[50];
-                int command = decodeCommand(input, &key, &value);
+                char key[KEYVALUELENGTH];
+                char value[KEYVALUELENGTH];
+                int command = decodeCommand(input, key, value);
                 int error;
                 switch (command) {
                     case 0:
                         error = put(key, value);
                         break;
                     case 1:
-                        error = get(key, &value);
+                        error = get(key, value);
                         break;
                     case 2:
                         error = del(key);
@@ -84,8 +85,7 @@ int main() {
                 strcat(output, "Your command is not valid!\n");
                 write(cfd, output, sizeof(output));
             }
-            bytes_read = read(cfd, input, BUFFERSIZE);
-            input[bytes_read - 2] = '\0';
+            bytes_read = read(cfd, input, KEYVALUELENGTH);
         }
     }
 }
