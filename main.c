@@ -49,6 +49,7 @@ int main() {
         exit(-1);
     }
 
+    // Initialize Sharded Memory
     initSharedMemory();
 
     while (1) {
@@ -63,19 +64,19 @@ int main() {
             input[bytes_read - 2] = '\0';
 
             while (bytes_read > 0) {
-                char output[50] = "\n";
+                char output[50] = "\0";
 
                 if (isInputValid(input)) {
                     char key[50];
                     char value[50];
-                    int command = decodeCommand(input, &key, &value);
+                    int command = decodeCommand(input, key, value);
                     int error;
                     switch (command) {
                         case 0:
                             error = put(key, value);
                             break;
                         case 1:
-                            error = get(key, &value);
+                            error = get(key, value);
                             break;
                         case 2:
                             error = del(key);
