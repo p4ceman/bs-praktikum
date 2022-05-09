@@ -3,10 +3,12 @@
 #include <sys/shm.h>
 
 #define SIZE sizeof(KeyValue)
+#define ARRAYLENGTH 100
+#define KEYVALUELENGTH 1024
 
 typedef struct keyValue{
-    char key[50];
-    char value[50];
+    char key[KEYVALUELENGTH];
+    char value[KEYVALUELENGTH];
 } KeyValue;
 
 KeyValue* dictionary;
@@ -18,12 +20,20 @@ void initSharedMemory() {
     dictionary = (KeyValue *) shmat(shm_id, 0,0);
 }
 
+void initiliaze(){
+    for (int i = 0; i < ARRAYLENGTH; ++i) {
+        dictionary[i].key[0] = '\0';
+        dictionary[i].value[0] = '\0';
+    }
+}
+
 //Die put() Funktion soll eine Wert (value) mit dem Schlüsselwert (key) hinterlegen.
 //Wenn der Schlüssel bereits vorhanden ist, soll der Wert überschrieben werden.
 //Der Rückgabewert der Funktion könnte Auskunft dazu geben.
 //Gibt 0 zurück wenn neuer Key hinzugefügt wurde, 1 wenn Value zu bereits existierendem Key überschrieben würde
 //und -1 wenn das Array voll ist. return -2 wenn strings nicht valide sind.
-int put(char *key, char *value) {
+
+int put(char* key, char* value) {
     int i = 0;
     while (dictionary[i].key[0] != '\0') {
         if (strcmp(dictionary[i].key, key) == 0) {
@@ -41,7 +51,7 @@ int put(char *key, char *value) {
 // Ist der Wert nicht vorhanden, wird durch einen Rückgabewert <0 darauf aufmerksam gemacht.
 // Gibt 0 zurück wenn key gefunden wurde , -1 wenn key nicht vorhanden ist, -2 wenn key nicht valiede
 // &res beim aufrufen in main nutzen /beachten... funktuniert sinnst nicht!!!!
-int get(char *key, char *res) {
+int get(char* key, char* res) {
     int i = 0;
     while (dictionary[i].key[0] != '\0') {
         if (strcmp(dictionary[i].key, key) == 0) {
@@ -57,7 +67,7 @@ int get(char *key, char *res) {
 // Rückgabewert: -1 -> String is nicht valide
 //                0 -> Key nicht vorhanden
 //                1 -> Key und Value wurden erfolgreich entfernt
-int del(char *key) {
+int del(char* key) {
     int i = 0;
     while (dictionary[i].key[0] != '\0') {
         if (strcmp(dictionary[i].key, key) == 0) {

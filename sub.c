@@ -9,10 +9,9 @@
 // GET 1
 // DEL 2
 // QUIT 3
-int decodeCommand(char *input, char key[], char value[]) {
-    char *command;
-    char * part;
-    command = strtok(input, " ");
+int decodeCommand(char* input, char* key, char* value) {
+    char* part;
+    char* command = strtok(input, " ");
     if (strcmp(command, "put") == 0 || strcmp(command, "PUT") == 0) {
         part = strtok(NULL, " ");
         strcpy(key, part);
@@ -34,7 +33,7 @@ int decodeCommand(char *input, char key[], char value[]) {
 /*Prüft, ob übergebener Input zulässig ist
 Rückgabewert:   1 => String ist valide
                 0 => String ist nicht valide*/
-int isInputValid(char input[]) {
+int isInputValid(char* input) {
     regex_t regex;
     regcomp(&regex,"^((((put|PUT) ([A-Za-z0-9])+|(get|GET)|(del|DEL)) ([A-Za-z0-9])+)|(quit|QUIT))$", REG_EXTENDED);
     if(regexec(&regex, input, 0, NULL, 0) == 0){
@@ -45,7 +44,7 @@ int isInputValid(char input[]) {
 }
 
 
-void printer(int command, char key[], char value[], int error, char string[]) {
+void printer(int command, char* key, char* value, int error, char* string) {
     strcat(string, "> ");
     switch(command){
         case 0:

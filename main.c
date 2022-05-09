@@ -7,7 +7,8 @@
 #include "keyValStore.h"
 #include "sub.h"
 
-#define BUFFERSIZE 1024 // Größe des Buffers
+#define KEYVALUELENGTH 1024 // Größe des Buffers
+#define OUTPUTBUFFERSIZE 2048
 #define PORT 5678
 
 int main() {
@@ -17,7 +18,7 @@ int main() {
 
     struct sockaddr_in client; // Socketadresse eines Clients
     socklen_t client_len; // Länge der Client-Daten
-    char input[BUFFERSIZE]; // Daten vom Client an den Server
+    char input[KEYVALUELENGTH]; // Daten vom Client an den Server
     long bytes_read; // Anzahl der Bytes, die der Client geschickt hat
 
     // Socket erstellen
@@ -52,9 +53,11 @@ int main() {
     // Initialize Sharded Memory
     initSharedMemory();
 
+
     while (1) {
         // Verbindung eines Clients wird entgegengenommen
         cfd = accept(rfd, (struct sockaddr *) &client, &client_len);
+
 
         int pid = fork();
 
@@ -94,6 +97,7 @@ int main() {
                 bytes_read = read(cfd, input, BUFFERSIZE);
                 input[bytes_read - 2] = '\0';
             }
+
         } else {
             close(cfd);
         }
