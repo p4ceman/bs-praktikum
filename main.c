@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include "keyValStore.h"
@@ -14,6 +13,7 @@
 int main() {
     int rfd; // Rendevouz-Descriptor
     int cfd; // Verbindungs-Descriptor
+    int shm_id; //id für das Shared Memory Segment
 
     struct sockaddr_in client; // Socketadresse eines Clients
     socklen_t client_len; // Länge der Client-Daten
@@ -49,6 +49,8 @@ int main() {
         exit(-1);
     }
 
+    initSharedMemory();
+
     while (1) {
         // Verbindung eines Clients wird entgegengenommen
         cfd = accept(rfd, (struct sockaddr *) &client, &client_len);
@@ -80,6 +82,7 @@ int main() {
                             break;
                         case 3:
                             close(cfd);
+                            exit(0);
                     }
                     printer(command, key, value, error, output);
                     write(cfd, output, sizeof(output));

@@ -1,14 +1,23 @@
 #include "keyValStore.h"
 #include <string.h>
+#include <sys/shm.h>
 
-#define ARRAYLENGTH 100
+#define SIZE sizeof(KeyValue)
 
 typedef struct keyValue{
     char key[50];
     char value[50];
 } KeyValue;
 
-KeyValue dictionary[ARRAYLENGTH];
+KeyValue* dictionary;
+int shm_id;
+
+void initSharedMemory() {
+    shm_id = shmget(IPC_PRIVATE, SIZE, IPC_CREAT|0600);
+    dictionary = (KeyValue *) shmat(shm_id, 0,0);
+}
+
+
 
 //Die put() Funktion soll eine Wert (value) mit dem Schlüsselwert (key) hinterlegen.
 //Wenn der Schlüssel bereits vorhanden ist, soll der Wert überschrieben werden.
@@ -23,9 +32,6 @@ int put(char key[], char value[]) {
             return 1;
         }
         i++;
-        if (i == ARRAYLENGTH) {
-            return -1;
-        }
     }
     strcpy(dictionary[i].key, key);
     strcpy(dictionary[i].value, value);
@@ -46,9 +52,6 @@ int get(char key[], char res[]) {
             return 0;
         }
         i++;
-        if (i == ARRAYLENGTH) {
-            return -1;
-        }
     }
     return -1;
 }
@@ -62,11 +65,6 @@ int del(char key[]) {
     while (dictionary[i].key[0] != '\0') {
         if (strcmp(dictionary[i].key, key) == 0) {
             while (dictionary[i].key[0] != '\0') {
-                if (i == ARRAYLENGTH - 1) {
-                    dictionary[i].key[0] = '\0';
-                    dictionary[i].value[0] = '\0';
-                    break;
-                }
                 strcpy(dictionary[i].key, dictionary[i + 1].key);
                 strcpy(dictionary[i].value, dictionary[i + 1].value);
                 i++;
@@ -74,9 +72,6 @@ int del(char key[]) {
             return 1;
         }
         i++;
-        if (i == ARRAYLENGTH) {
-            return -1;
-        }
     }
     return -1;
 }
