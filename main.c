@@ -63,15 +63,15 @@ int main() {
 
         if (pid == 0) {
             // Lesen von Daten, die der Client schickt
-            bytes_read = read(cfd, input, OUTPUTBUFFERSIZE);
+            bytes_read = read(cfd, input, KEYVALUELENGTH);
             input[bytes_read - 2] = '\0';
 
             while (bytes_read > 0) {
-                char output[50] = "\0";
+                char output[OUTPUTBUFFERSIZE] = "\0";
 
                 if (isInputValid(input)) {
-                    char key[50];
-                    char value[50];
+                    char key[KEYVALUELENGTH];
+                    char value[KEYVALUELENGTH];
                     int command = decodeCommand(input, key, value);
                     int error;
                     switch (command) {
@@ -94,7 +94,7 @@ int main() {
                     strcat(output, "Your command is not valid!\n");
                     write(cfd, output, sizeof(output));
                 }
-                bytes_read = read(cfd, input, OUTPUTBUFFERSIZE);
+                bytes_read = read(cfd, input, KEYVALUELENGTH);
                 input[bytes_read - 2] = '\0';
             }
 
