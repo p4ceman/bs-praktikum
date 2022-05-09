@@ -14,6 +14,7 @@
 int main() {
     int rfd; // Rendevouz-Descriptor
     int cfd; // Verbindungs-Descriptor
+    int shm_id; //id für das Shared Memory Segment
 
     struct sockaddr_in client; // Socketadresse eines Clients
     socklen_t client_len; // Länge der Client-Daten
@@ -49,43 +50,56 @@ int main() {
         exit(-1);
     }
 
-    initiliaze();
+    // Initialize Sharded Memory
+    initSharedMemory();
+
 
     while (1) {
         // Verbindung eines Clients wird entgegengenommen
         cfd = accept(rfd, (struct sockaddr *) &client, &client_len);
 
-        // Lesen von Daten, die der Client schickt
-        bytes_read = read(cfd, input, KEYVALUELENGTH);
 
-        while (bytes_read > 0) {
+        int pid = fork();
+
+        if (pid == 0) {
+            // Lesen von Daten, die der Client schickt
+            bytes_read = read(cfd, input, BUFFERSIZE);
             input[bytes_read - 2] = '\0';
-            char output[OUTPUTBUFFERSIZE] = "";
-            if (isInputValid(input)) {
-                char key[KEYVALUELENGTH];
-                char value[KEYVALUELENGTH];
-                int command = decodeCommand(input, key, value);
-                int error;
-                switch (command) {
-                    case 0:
-                        error = put(key, value);
-                        break;
-                    case 1:
-                        error = get(key, value);
-                        break;
-                    case 2:
-                        error = del(key);
-                        break;
-                    case 3:
-                        close(cfd);
+
+            while (bytes_read > 0) {
+                char output[50] = "\0";
+
+                if (isInputValid(input)) {
+                    char key[50];
+                    char value[50];
+                    int command = decodeCommand(input, key, value);
+                    int error;
+                    switch (command) {
+                        case 0:
+                            error = put(key, value);
+                            break;
+                        case 1:
+                            error = get(key, value);
+                            break;
+                        case 2:
+                            error = del(key);
+                            break;
+                        case 3:
+                            close(cfd);
+                            exit(0);
+                    }
+                    printer(command, key, value, error, output);
+                    write(cfd, output, sizeof(output));
+                } else {
+                    strcat(output, "Your command is not valid!\n");
+                    write(cfd, output, sizeof(output));
                 }
-                printer(command, key, value, error, output);
-                write(cfd, output, sizeof(output));
-            } else {
-                strcat(output, "Your command is not valid!\n");
-                write(cfd, output, sizeof(output));
+                bytes_read = read(cfd, input, BUFFERSIZE);
+                input[bytes_read - 2] = '\0';
             }
-            bytes_read = read(cfd, input, KEYVALUELENGTH);
+
+        } else {
+            close(cfd);
         }
     }
 }

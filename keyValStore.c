@@ -1,6 +1,8 @@
 #include "keyValStore.h"
 #include <string.h>
+#include <sys/shm.h>
 
+#define SIZE sizeof(KeyValue)
 #define ARRAYLENGTH 100
 #define KEYVALUELENGTH 1024
 
@@ -9,7 +11,14 @@ typedef struct keyValue{
     char value[KEYVALUELENGTH];
 } KeyValue;
 
-KeyValue dictionary[ARRAYLENGTH];
+KeyValue* dictionary;
+int shm_id;
+
+//Die initSharedMemory() weißt dem dictionary einen Shared Memory Bereich zu.
+void initSharedMemory() {
+    shm_id = shmget(IPC_PRIVATE, SIZE, IPC_CREAT|0600);
+    dictionary = (KeyValue *) shmat(shm_id, 0,0);
+}
 
 void initiliaze(){
     for (int i = 0; i < ARRAYLENGTH; ++i) {
@@ -23,6 +32,7 @@ void initiliaze(){
 //Der Rückgabewert der Funktion könnte Auskunft dazu geben.
 //Gibt 0 zurück wenn neuer Key hinzugefügt wurde, 1 wenn Value zu bereits existierendem Key überschrieben würde
 //und -1 wenn das Array voll ist. return -2 wenn strings nicht valide sind.
+
 int put(char* key, char* value) {
     int i = 0;
     while (dictionary[i].key[0] != '\0') {
@@ -31,9 +41,6 @@ int put(char* key, char* value) {
             return 1;
         }
         i++;
-        if (i == ARRAYLENGTH) {
-            return -1;
-        }
     }
     strcpy(dictionary[i].key, key);
     strcpy(dictionary[i].value, value);
@@ -52,9 +59,6 @@ int get(char* key, char* res) {
             return 0;
         }
         i++;
-        if (i == ARRAYLENGTH) {
-            return -1;
-        }
     }
     return -1;
 }
@@ -68,11 +72,6 @@ int del(char* key) {
     while (dictionary[i].key[0] != '\0') {
         if (strcmp(dictionary[i].key, key) == 0) {
             while (dictionary[i].key[0] != '\0') {
-                if (i == ARRAYLENGTH - 1) {
-                    dictionary[i].key[0] = '\0';
-                    dictionary[i].value[0] = '\0';
-                    break;
-                }
                 strcpy(dictionary[i].key, dictionary[i + 1].key);
                 strcpy(dictionary[i].value, dictionary[i + 1].value);
                 i++;
@@ -80,9 +79,6 @@ int del(char* key) {
             return 1;
         }
         i++;
-        if (i == ARRAYLENGTH) {
-            return -1;
-        }
     }
     return -1;
 }
