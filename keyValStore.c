@@ -3,7 +3,6 @@
 #include <sys/shm.h>
 
 #define SIZE sizeof(KeyValue)
-#define ARRAYLENGTH 100
 #define KEYVALUELENGTH 1024
 
 typedef struct keyValue{
@@ -18,13 +17,6 @@ int shm_id;
 void initSharedMemory() {
     shm_id = shmget(IPC_PRIVATE, SIZE, IPC_CREAT|0600);
     dictionary = (KeyValue *) shmat(shm_id, 0,0);
-}
-
-void initiliaze(){
-    for (int i = 0; i < ARRAYLENGTH; ++i) {
-        dictionary[i].key[0] = '\0';
-        dictionary[i].value[0] = '\0';
-    }
 }
 
 //Die put() Funktion soll eine Wert (value) mit dem Schlüsselwert (key) hinterlegen.
