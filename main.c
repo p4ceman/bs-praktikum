@@ -49,8 +49,9 @@ int main() {
         exit(-1);
     }
 
-    // Initialize Sharded Memory
+    // Initialize Sharded Memory and Semaphore
     initSharedMemory();
+    initSemaphore();
 
     while (1) {
         // Verbindung eines Clients wird entgegengenommen
@@ -62,8 +63,14 @@ int main() {
             // Lesen von Daten, die der Client schickt
             bytes_read = read(cfd, input, KEYVALUELENGTH);
             input[bytes_read - 2] = '\0';
+            int blocker = 0;
 
             while (bytes_read > 0) {
+                //überprüfung semaphore
+                if (blocker == 0) {
+                    int test = beg();
+                    test = end();
+                }
                 char output[OUTPUTBUFFERSIZE] = "\0";
                 if (isInputValid(input)) {
                     char key[KEYVALUELENGTH];
@@ -81,8 +88,19 @@ int main() {
                             error = del(key);
                             break;
                         case 3:
+                            if (blocker == 1) {
+                                blocker = end();
+                            }
                             close(cfd);
                             exit(0);
+                        case 4:
+                            error = beg();
+                            blocker = 1;
+                            break;
+                        case 5:
+                            error = end();
+                            blocker = 0;
+                            break;
                     }
                     printer(command, key, value, error, output);
                     write(cfd, output, sizeof(output));
