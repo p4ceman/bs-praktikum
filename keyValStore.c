@@ -1,7 +1,9 @@
 #include "keyValStore.h"
 #include <string.h>
 #include <sys/shm.h>
+#include <sys/sem.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 #define LENGTH 100
 #define SIZE sizeof(KeyValue) * LENGTH
@@ -19,14 +21,63 @@ KeyValue* dictionary;
 //Die initSharedMemory() weißt dem dictionary einen Shared Memory Bereich zu.
 void initSharedMemory() {
     int shm_id = shmget(IPC_PRIVATE, SIZE, IPC_CREAT|0600);
+    if (shm_id == -1) {
+        perror("Shared Memory konnte nicht angelegt werden");
+        exit(1);
+    }
     dictionary = (KeyValue *) shmat(shm_id, 0,0);
 }
 
+//Methoden zum Freigeben des Shared Memory
 void detachSharedMemory(){
     int result = shmdt(0);
     if(result < 0){
         fprintf(stderr, "Shared Memory konnte nicht detached werden\n");
     }
+}
+int sem_id;
+struct sembuf enter, leave, test;
+
+//Initialisiert eine Semaphore zum Blockieren von Prozessen
+void initSemaphore() {
+    sem_id = semget(IPC_PRIVATE, 1, IPC_CREAT | 0600);
+    if (sem_id == -1) {
+        perror("Semaphore konnte nicht angelegt werden");
+        exit(1);
+    }
+    unsigned short token[1];
+    token[0] = 1;
+    semctl(sem_id, 1, SETALL, token);
+    enter.sem_num = leave.sem_num = 0;
+    enter.sem_flg = leave.sem_flg = SEM_UNDO;
+    enter.sem_op = -1; //DOWN-Operation
+    leave.sem_op = 1; //UP-Operation
+}
+
+void detachSemaphore() {
+    int result = semctl(sem_id, 0, IPC_RMID);
+    if (result == -1) {
+        perror("Semaphore konnte nicht detached werden");
+        exit(1);
+    }
+}
+
+//Methode zum überprüfen ob ein Prozess laufen darf
+void testSem() {
+    int result = beg();
+    result = end();
+}
+
+//Methode für den Eintritt in den kritischen Bereich
+int beg() {
+    int result = semop(sem_id, &enter, 1);
+    return result;
+}
+
+//Methode für den Verlassen des kritischen Bereichs
+int end() {
+    int result = semop(sem_id, &leave, 1);
+    return result;
 }
 
 //Die put() Funktion soll eine Wert (value) mit dem Schlüsselwert (key) hinterlegen.
