@@ -14,7 +14,6 @@
 int main() {
     int rfd; // Rendevouz-Descriptor
     int cfd; // Verbindungs-Descriptor
-    int shm_id; //id für das Shared Memory Segment
 
     struct sockaddr_in client; // Socketadresse eines Clients
     socklen_t client_len; // Länge der Client-Daten
@@ -53,11 +52,9 @@ int main() {
     // Initialize Sharded Memory
     initSharedMemory();
 
-
     while (1) {
         // Verbindung eines Clients wird entgegengenommen
         cfd = accept(rfd, (struct sockaddr *) &client, &client_len);
-
 
         int pid = fork();
 
@@ -68,7 +65,6 @@ int main() {
 
             while (bytes_read > 0) {
                 char output[OUTPUTBUFFERSIZE] = "\0";
-
                 if (isInputValid(input)) {
                     char key[KEYVALUELENGTH];
                     char value[KEYVALUELENGTH];
@@ -97,7 +93,6 @@ int main() {
                 bytes_read = read(cfd, input, KEYVALUELENGTH);
                 input[bytes_read - 2] = '\0';
             }
-
         } else {
             close(cfd);
         }

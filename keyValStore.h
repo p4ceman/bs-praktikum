@@ -3,6 +3,7 @@
 #endif //BS_PRAKTIKUM_KEYVALSTORE_H
 
 void initSharedMemory();
+void detachSharedMemory();
 int put(char* key, char* value);
 int get(char* key, char* res);
 int del(char* key);

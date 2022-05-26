@@ -1,9 +1,13 @@
 #include "keyValStore.h"
 #include <string.h>
 #include <sys/shm.h>
+#include <stdio.h>
 
-#define SIZE sizeof(KeyValue)
+#define LENGTH 100
+#define SIZE sizeof(KeyValue) * LENGTH
 #define KEYVALUELENGTH 1024
+
+// TODO: LENGTH Check
 
 typedef struct keyValue{
     char key[KEYVALUELENGTH];
@@ -11,12 +15,18 @@ typedef struct keyValue{
 } KeyValue;
 
 KeyValue* dictionary;
-int shm_id;
 
 //Die initSharedMemory() weißt dem dictionary einen Shared Memory Bereich zu.
 void initSharedMemory() {
-    shm_id = shmget(IPC_PRIVATE, SIZE, IPC_CREAT|0600);
+    int shm_id = shmget(IPC_PRIVATE, SIZE, IPC_CREAT|0600);
     dictionary = (KeyValue *) shmat(shm_id, 0,0);
+}
+
+void detachSharedMemory(){
+    int result = shmdt(0);
+    if(result < 0){
+        fprintf(stderr, "Shared Memory konnte nicht detached werden\n");
+    }
 }
 
 //Die put() Funktion soll eine Wert (value) mit dem Schlüsselwert (key) hinterlegen.
@@ -24,7 +34,6 @@ void initSharedMemory() {
 //Der Rückgabewert der Funktion könnte Auskunft dazu geben.
 //Gibt 0 zurück wenn neuer Key hinzugefügt wurde, 1 wenn Value zu bereits existierendem Key überschrieben würde
 //und -1 wenn das Array voll ist. return -2 wenn strings nicht valide sind.
-
 int put(char* key, char* value) {
     int i = 0;
     while (dictionary[i].key[0] != '\0') {
@@ -34,6 +43,7 @@ int put(char* key, char* value) {
         }
         i++;
     }
+    printf("New key-value pair at: %p\n", dictionary+i);
     strcpy(dictionary[i].key, key);
     strcpy(dictionary[i].value, value);
     return 0;
