@@ -4,6 +4,11 @@
 
 void initSharedMemory();
 void detachSharedMemory();
+void initSemaphore();
+void detachSemaphore();
+void testSem();
+int beg();
+int end();
 int put(char* key, char* value);
 int get(char* key, char* res);
 int del(char* key);
