@@ -6,12 +6,22 @@
 #include <netinet/in.h>
 #include "keyValStore.h"
 #include "sub.h"
+#include  <signal.h>
 
 #define KEYVALUELENGTH 1024 // Größe des Buffers
 #define OUTPUTBUFFERSIZE 2048
 #define PORT 5678
 
+
+void handleExit(int sig){
+    signal(sig, SIG_IGN);
+    /*detachSemaphore();
+    detachSharedMemory();*/
+    exit(0);
+}
+
 int main() {
+    signal(SIGINT, handleExit);
     int rfd; // Rendevouz-Descriptor
     int cfd; // Verbindungs-Descriptor
 
@@ -63,13 +73,13 @@ int main() {
             // Lesen von Daten, die der Client schickt
             bytes_read = read(cfd, input, KEYVALUELENGTH);
             input[bytes_read - 2] = '\0';
-            int blocker = 0;
+            int semaphoreStatus = 1;
 
             while (bytes_read > 0) {
-                //überprüfung semaphore
-                if (blocker == 0) {
-                    int test = beg();
-                    test = end();
+                //überprüfung, ob semaphore aktiv ist
+                if (semaphoreStatus == 1) {
+                    beg();
+                    end();
                 }
                 char output[OUTPUTBUFFERSIZE] = "\0";
                 if (isInputValid(input)) {
@@ -88,18 +98,18 @@ int main() {
                             error = del(key);
                             break;
                         case 3:
-                            if (blocker == 1) {
-                                blocker = end();
+                            if (semaphoreStatus == 0) {
+                                end();
                             }
                             close(cfd);
                             exit(0);
                         case 4:
                             error = beg();
-                            blocker = 1;
+                            semaphoreStatus = 0;
                             break;
                         case 5:
                             error = end();
-                            blocker = 0;
+                            semaphoreStatus = 1;
                             break;
                     }
                     printer(command, key, value, error, output);

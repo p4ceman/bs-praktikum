@@ -9,8 +9,6 @@
 #define SIZE sizeof(KeyValue) * LENGTH
 #define KEYVALUELENGTH 1024
 
-// TODO: LENGTH Check
-
 typedef struct keyValue{
     char key[KEYVALUELENGTH];
     char value[KEYVALUELENGTH];
@@ -47,7 +45,7 @@ void initSemaphore() {
     }
     unsigned short token[1];
     token[0] = 1;
-    semctl(sem_id, 1, SETALL, token);
+    semctl(sem_id, 1, SETALL, token); //Initialisiere Semaphore mit einem Platz
     enter.sem_num = leave.sem_num = 0;
     enter.sem_flg = leave.sem_flg = SEM_UNDO;
     enter.sem_op = -1; //DOWN-Operation
@@ -60,12 +58,6 @@ void detachSemaphore() {
         perror("Semaphore konnte nicht detached werden");
         exit(1);
     }
-}
-
-//Methode zum überprüfen ob ein Prozess laufen darf
-void testSem() {
-    int result = beg();
-    result = end();
 }
 
 //Methode für den Eintritt in den kritischen Bereich
@@ -93,6 +85,9 @@ int put(char* key, char* value) {
             return 1;
         }
         i++;
+        if(i >= LENGTH){
+            return -1;
+        }
     }
     printf("New key-value pair at: %p\n", dictionary+i);
     strcpy(dictionary[i].key, key);
@@ -106,7 +101,7 @@ int put(char* key, char* value) {
 // &res beim aufrufen in main nutzen /beachten... funktuniert sinnst nicht!!!!
 int get(char* key, char* res) {
     int i = 0;
-    while (dictionary[i].key[0] != '\0') {
+    while (i < LENGTH && dictionary[i].key[0] != '\0') {
         if (strcmp(dictionary[i].key, key) == 0) {
             strcpy(res, dictionary[i].value);
             return 0;
@@ -122,14 +117,20 @@ int get(char* key, char* res) {
 //                1 -> Key und Value wurden erfolgreich entfernt
 int del(char* key) {
     int i = 0;
-    while (dictionary[i].key[0] != '\0') {
+    while (i < LENGTH && dictionary[i].key[0] != '\0') {
         if (strcmp(dictionary[i].key, key) == 0) {
-            while (dictionary[i].key[0] != '\0') {
-                strcpy(dictionary[i].key, dictionary[i + 1].key);
-                strcpy(dictionary[i].value, dictionary[i + 1].value);
+            while (i < LENGTH && dictionary[i].key[0] != '\0') {
+                if(i == LENGTH - 1){
+                    dictionary[i].key[0] = '\0';
+                    dictionary[i].value[0] = '\0';
+                }
+                else {
+                    strcpy(dictionary[i].key, dictionary[i + 1].key);
+                    strcpy(dictionary[i].value, dictionary[i + 1].value);
+                }
                 i++;
             }
-            return 1;
+            return 0;
         }
         i++;
     }
