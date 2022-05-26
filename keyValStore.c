@@ -36,7 +36,7 @@ void detachSharedMemory(){
     }
 }
 int sem_id;
-struct sembuf enter, leave, test;
+struct sembuf enter, leave;
 
 //Initialisiert eine Semaphore zum Blockieren von Prozessen
 void initSemaphore() {
