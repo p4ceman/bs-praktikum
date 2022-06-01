@@ -3,6 +3,7 @@
 #include "keyValStore.h"
 #include <string.h>
 #include <regex.h>
+#include <stdio.h>
 
 // isInputValid vorher laufen lassen
 // PUT 0
@@ -11,6 +12,7 @@
 // QUIT 3
 // BEG 4
 // END 5
+// SUB 6
 int decodeCommand(char* input, char* key, char* value) {
     char* part;
     char* command = strtok(input, " ");
@@ -32,8 +34,12 @@ int decodeCommand(char* input, char* key, char* value) {
         return 3;
     } else if (strcmp(command, "beg") == 0 || strcmp(command, "BEG") == 0) {
         return 4;
+    } else if (strcmp(command, "end") == 0 || strcmp(command, "END") == 0) {
+        return 5;
     }
-    return 5;
+    part = strtok(NULL, " ");
+    strcpy(key, part);
+    return 6;
 }
 
 /*Prüft, ob übergebener Input zulässig ist
@@ -41,7 +47,7 @@ Rückgabewert:   1 => String ist valide
                 0 => String ist nicht valide*/
 int isInputValid(char* input) {
     regex_t regex;
-    regcomp(&regex,"^((((put|PUT) ([A-Za-z0-9])+|(get|GET)|(del|DEL)) ([A-Za-z0-9])+)|((quit|QUIT)|(beg|BEG)|(end|END)))$", REG_EXTENDED);
+    regcomp(&regex,"^((((put|PUT) ([A-Za-z0-9])+|(get|GET)|(del|DEL)|(sub|SUB)) ([A-Za-z0-9])+)|((quit|QUIT)|(beg|BEG)|(end|END)))$", REG_EXTENDED);
     if(regexec(&regex, input, 0, NULL, 0) == 0){
         return 1;
     } else{
@@ -102,6 +108,16 @@ void printer(int command, char* key, char* value, int error, char* string) {
                 strcat(string, "could not exit block\n");
             } else {
                 strcat(string, "access block ended\n");
+            }
+            break;
+        case 6:
+            strcat(string, "SUB:");
+            strcat(string, key);
+            strcat(string, ":");
+            if (error == -1) {
+                strcat(string, "could not sub to key\n");
+            } else {
+                strcat(string, "subbed to key\n");
             }
             break;
     }

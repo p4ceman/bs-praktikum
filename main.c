@@ -59,9 +59,10 @@ int main() {
         exit(-1);
     }
 
-    // Initialize Sharded Memory and Semaphore
+    // Initialize Sharded Memory, Semaphore and Message Queue
     initSharedMemory();
     initSemaphore();
+    initMessageQueue();
 
     while (1) {
         // Verbindung eines Clients wird entgegengenommen
@@ -70,56 +71,76 @@ int main() {
         int pid = fork();
 
         if (pid == 0) {
-            // Lesen von Daten, die der Client schickt
-            bytes_read = read(cfd, input, KEYVALUELENGTH);
-            input[bytes_read - 2] = '\0';
-            int semaphoreStatus = 1;
-
-            while (bytes_read > 0) {
-                //überprüfung, ob semaphore aktiv ist
-                if (semaphoreStatus == 1) {
-                    beg();
-                    end();
-                }
-                char output[OUTPUTBUFFERSIZE] = "\0";
-                if (isInputValid(input)) {
-                    char key[KEYVALUELENGTH];
-                    char value[KEYVALUELENGTH];
-                    int command = decodeCommand(input, key, value);
-                    int error;
-                    switch (command) {
-                        case 0:
-                            error = put(key, value);
-                            break;
-                        case 1:
-                            error = get(key, value);
-                            break;
-                        case 2:
-                            error = del(key);
-                            break;
-                        case 3:
-                            if (semaphoreStatus == 0) {
-                                end();
-                            }
-                            close(cfd);
-                            exit(0);
-                        case 4:
-                            error = beg();
-                            semaphoreStatus = 0;
-                            break;
-                        case 5:
-                            error = end();
-                            semaphoreStatus = 1;
-                            break;
+            int newpid = fork();
+            if(newpid == 0) {
+                newpid = getpid();
+                char submessage[2055] = "\0";
+                int test = 0;
+                while (test != 1) {
+                    int status = recieveMessage(newpid, submessage);
+                    if (status == 0) {
+                        write(cfd, submessage, sizeof (submessage));
                     }
-                    printer(command, key, value, error, output);
-                    write(cfd, output, sizeof(output));
-                } else {
-                    strcat(output, "Your command is not valid!\n");
-                    write(cfd, output, sizeof(output));
+                    test = getppid();
                 }
+                close(cfd);
+            } else if (newpid > 0) {
+                // Lesen von Daten, die der Client schickt
                 bytes_read = read(cfd, input, KEYVALUELENGTH);
                 input[bytes_read - 2] = '\0';
+                int semaphoreStatus = 1;
+
+                while (bytes_read > 0) {
+                    //überprüfung, ob semaphore aktiv ist
+                    if (semaphoreStatus == 1) {
+                        beg(1);
+                        end(1);
+                    }
+                    char output[OUTPUTBUFFERSIZE] = "\0";
+                    if (isInputValid(input)) {
+                        char key[KEYVALUELENGTH];
+                        char value[KEYVALUELENGTH];
+                        int command = decodeCommand(input, key, value);
+                        int error;
+                        switch (command) {
+                            case 0:
+                                error = put(key, value);
+                                break;
+                            case 1:
+                                error = get(key, value);
+                                break;
+                            case 2:
+                                error = del(key);
+                                break;
+                            case 3:
+                                if (semaphoreStatus == 0) {
+                                    end(1);
+                                }
+                                close(cfd);
+                                exit(0);
+                            case 4:
+                                error = beg(1);
+                                semaphoreStatus = 0;
+                                break;
+                            case 5:
+                                error = end(1);
+                                semaphoreStatus = 1;
+                                break;
+                            case 6:
+                                error = sub(key, newpid);
+                                break;
+                        }
+                        printer(command, key, value, error, output);
+                        write(cfd, output, sizeof(output));
+                    } else {
+                        strcat(output, "Your command is not valid!\n");
+                        write(cfd, output, sizeof(output));
+                    }
+                    bytes_read = read(cfd, input, KEYVALUELENGTH);
+                    input[bytes_read - 2] = '\0';
+                }
+            } else {
+                printf("Kindprozess konnte nicht erstellt werden!");
             }
         } else {
             close(cfd);
