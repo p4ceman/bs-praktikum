@@ -12,16 +12,27 @@
 #define OUTPUTBUFFERSIZE 2048
 #define PORT 5678
 
+int masterpid;
 
 void handleExit(int sig){
-    signal(sig, SIG_IGN);
-    /*detachSemaphore();
-    detachSharedMemory();*/
+    if(getpid() != masterpid){
+        exit(0);
+    }
+    detachMessageQueue();
+    detachSemaphore();
+    detachSharedMemory();
     exit(0);
 }
 
+
 int main() {
-    signal(SIGINT, handleExit);
+    masterpid = getpid();
+
+    struct sigaction sa;
+    sa.sa_handler = &handleExit;
+    sigaction(SIGINT, &sa, NULL);
+
+
     int rfd; // Rendevouz-Descriptor
     int cfd; // Verbindungs-Descriptor
 

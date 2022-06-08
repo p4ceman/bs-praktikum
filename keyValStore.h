@@ -7,6 +7,7 @@ void detachSharedMemory();
 void initSemaphore();
 void detachSemaphore();
 void initMessageQueue();
+void detachMessageQueue();
 int recieveMessage(int pid, char* string);
 int beg();
 int end();

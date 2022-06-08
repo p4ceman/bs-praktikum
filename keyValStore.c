@@ -6,6 +6,7 @@
 #include <sys/msg.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 
 #define LENGTH 100
 #define SIZE sizeof(KeyValue) * LENGTH
@@ -31,16 +32,18 @@ typedef struct message{
     char mtext[7+2*KEYVALUELENGTH];
 } Message;
 
+int shm_id;
+int shm_id2;
 //Die initSharedMemory() weißt dem dictionary und dem subStore jeweils einen Shared Memory Bereich zu.
 void initSharedMemory() {
-    int shm_id = shmget(IPC_PRIVATE, SIZE, IPC_CREAT|0600);
+    shm_id = shmget(IPC_PRIVATE, SIZE, IPC_CREAT|0600);
     if (shm_id == -1) {
         perror("Shared Memory für KeyValueStore konnte nicht angelegt werden");
         exit(1);
     }
     dictionary = (KeyValue *) shmat(shm_id, 0,0);
 
-    int shm_id2 = shmget(IPC_PRIVATE, SIZE2, IPC_CREAT|0600);
+    shm_id2 = shmget(IPC_PRIVATE, SIZE2, IPC_CREAT|0600);
     if (shm_id2 == -1) {
         perror("Shared Memory für SubStore konnte nicht angelegt werden");
         exit(1);
@@ -50,9 +53,19 @@ void initSharedMemory() {
 
 //Methoden zum Freigeben des Shared Memory
 void detachSharedMemory(){
-    int result = shmdt(0);
+    int result = shmdt(dictionary);
     if(result < 0){
-        fprintf(stderr, "Shared Memory konnte nicht detached werden\n");
+        write(STDERR_FILENO, "Shared Memory Dictionary Error\n", 31);
+    }
+    else {
+        shmctl(shm_id, IPC_RMID, NULL);
+    }
+    int result2 = shmdt(subStore);
+    if(result2 < 0){
+        write(STDERR_FILENO, "Shared Memory SubStore Error\n", 29);
+    }
+    else {
+        shmctl(shm_id2, IPC_RMID, NULL);
     }
 }
 int sem_id, sem_id2;
@@ -84,19 +97,24 @@ void initSemaphore() {
 void detachSemaphore() {
     int result = semctl(sem_id, 0, IPC_RMID);
     if (result == -1) {
-        perror("Semaphore für KeyValueStore konnte nicht detached werden");
-        exit(1);
+        write(STDERR_FILENO, "Semaphore KeyValueStore Error\n", 30);
     }
     result = semctl(sem_id2, 0, IPC_RMID);
     if (result == -1) {
-        perror("Semaphore für SubStore konnte nicht detached werden");
-        exit(1);
+        write(STDERR_FILENO, "Semaphore SubStore Error\n", 25);
     }
 }
 
 int msg_id;
 void initMessageQueue() {
     msg_id = msgget(100, IPC_CREAT | 0666);
+}
+
+void detachMessageQueue(){
+    int result = msgctl(msg_id,IPC_RMID,NULL);
+    if(result < 0){
+        write(STDERR_FILENO, "MessageQueue Error\n", 19);
+    }
 }
 
 //Methode für den Eintritt in den kritischen Bereich
